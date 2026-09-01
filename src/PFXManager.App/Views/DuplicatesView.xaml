@@ -1,0 +1,52 @@
+<UserControl x:Class="PFXManager.App.Views.DuplicatesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:PFXManager.App.Resources">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{x:Static res:Strings.Nav_Duplicates}" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Groups}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock FontWeight="Bold" Text="1 sertifikat" Margin="0,0,12,0" />
+                                    <TextBlock Foreground="{StaticResource TextSecondaryBrush}">
+                                        <Run Text="{Binding CopyCount, Mode=OneWay}" />
+                                        <Run Text=" nusxa" />
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding OwnerDisplay}" Margin="16,0,0,0" FontWeight="SemiBold" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding Thumbprint}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,8" />
+
+                                <ItemsControl ItemsSource="{Binding Copies}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding FullPath}" VerticalAlignment="Center" />
+                                                <Button Grid.Column="1" Content="{x:Static res:Strings.ShowInExplorer}"
+                                                        Command="{Binding DataContext.ShowInExplorerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}" Padding="8,2" Margin="8,0,0,0" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

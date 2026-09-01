@@ -1,0 +1,44 @@
+<UserControl x:Class="PFXManager.App.Views.WindowsCertificatesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:PFXManager.App.Resources">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{x:Static res:Strings.Nav_WindowsCertificates}" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+            <RadioButton Content="{x:Static res:Strings.WindowsCert_CurrentUser}" IsChecked="{Binding UseLocalMachine, Converter={StaticResource InverseBoolConverter}}"
+                         GroupName="Store" VerticalAlignment="Center" Margin="0,0,16,0" />
+            <RadioButton Content="{x:Static res:Strings.WindowsCert_LocalMachine}" IsChecked="{Binding UseLocalMachine}"
+                         GroupName="Store" VerticalAlignment="Center" Margin="0,0,16,0" />
+            <Button Content="{x:Static res:Strings.Refresh}" Command="{Binding LoadCommand}" Padding="10,6" />
+        </StackPanel>
+
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Certificates}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="{x:Static res:Strings.Col_Status}" Binding="{Binding Status, Converter={StaticResource StatusToBadgeConverter}}" Width="150" />
+                <DataGridTextColumn Header="Subject" Binding="{Binding Subject}" Width="240" />
+                <DataGridTextColumn Header="Issuer" Binding="{Binding Issuer}" Width="200" />
+                <DataGridTextColumn Header="{x:Static res:Strings.Col_Serial}" Binding="{Binding SerialNumber}" Width="130" />
+                <DataGridTextColumn Header="{x:Static res:Strings.Col_Thumbprint}" Binding="{Binding Thumbprint}" Width="160" />
+                <DataGridTextColumn Header="{x:Static res:Strings.Col_NotBefore}" Binding="{Binding NotBefore, StringFormat=dd.MM.yyyy}" Width="100" />
+                <DataGridTextColumn Header="{x:Static res:Strings.Col_NotAfter}" Binding="{Binding NotAfter, StringFormat=dd.MM.yyyy}" Width="100" />
+                <DataGridTextColumn Header="{x:Static res:Strings.WindowsCert_StoreLabel}" Binding="{Binding StoreLocation}" Width="110" />
+                <DataGridTemplateColumn Header="" Width="180">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="{x:Static res:Strings.WindowsCert_Remove}"
+                                    Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    CommandParameter="{Binding}" Padding="8,4" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

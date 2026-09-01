@@ -1,0 +1,74 @@
+<UserControl x:Class="PFXManager.App.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:PFXManager.App.Resources">
+    <UserControl.Resources>
+        <Style x:Key="CardNumberStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="30" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="CardLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+            <Setter Property="Margin" Value="0,4,0,0" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Padding="24" VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <TextBlock Text="{x:Static res:Strings.Nav_Dashboard}" FontSize="22" FontWeight="Bold" Margin="0,0,0,20" />
+
+            <UniformGrid Columns="4" Rows="2">
+                <Button Style="{StaticResource StatCardButtonStyle}" Margin="0,0,12,12" Command="{Binding ShowTotalCommand}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding TotalCount}" Style="{StaticResource CardNumberStyle}" />
+                        <TextBlock Text="{x:Static res:Strings.Total}" Style="{StaticResource CardLabelStyle}" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource StatCardButtonStyle}" Margin="0,0,12,12" Command="{Binding ShowActiveCommand}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding ActiveCount}" Style="{StaticResource CardNumberStyle}" Foreground="#2E7D32" />
+                        <TextBlock Text="{x:Static res:Strings.Active}" Style="{StaticResource CardLabelStyle}" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource StatCardButtonStyle}" Margin="0,0,12,12" Command="{Binding ShowExpiredCommand}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding ExpiredCount}" Style="{StaticResource CardNumberStyle}" Foreground="#C0392B" />
+                        <TextBlock Text="{x:Static res:Strings.Expired}" Style="{StaticResource CardLabelStyle}" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource StatCardButtonStyle}" Margin="0,0,0,12" Command="{Binding ShowExpiringSoonCommand}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding ExpiringSoonCount}" Style="{StaticResource CardNumberStyle}" Foreground="#B8860B" />
+                        <TextBlock Text="{x:Static res:Strings.ExpiringSoon30}" Style="{StaticResource CardLabelStyle}" />
+                    </StackPanel>
+                </Button>
+
+                <Button Style="{StaticResource StatCardButtonStyle}" Margin="0,0,12,0" Command="{Binding ShowExpiringCommand}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding ExpiringCount}" Style="{StaticResource CardNumberStyle}" Foreground="#D35400" />
+                        <TextBlock Text="{x:Static res:Strings.Expiring90}" Style="{StaticResource CardLabelStyle}" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource StatCardButtonStyle}" Margin="0,0,12,0" Command="{Binding ShowDuplicatesCommand}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding DuplicateCount}" Style="{StaticResource CardNumberStyle}" />
+                        <TextBlock Text="{x:Static res:Strings.DuplicatesLabel}" Style="{StaticResource CardLabelStyle}" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource StatCardButtonStyle}" Margin="0,0,12,0" Command="{Binding ShowPasswordRequiredCommand}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding PasswordRequiredCount}" Style="{StaticResource CardNumberStyle}" />
+                        <TextBlock Text="{x:Static res:Strings.PasswordRequired}" Style="{StaticResource CardLabelStyle}" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource StatCardButtonStyle}" Margin="0,0,0,0" Command="{Binding ShowReadErrorCommand}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding ReadErrorCount}" Style="{StaticResource CardNumberStyle}" />
+                        <TextBlock Text="{x:Static res:Strings.ReadError}" Style="{StaticResource CardLabelStyle}" />
+                    </StackPanel>
+                </Button>
+            </UniformGrid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
