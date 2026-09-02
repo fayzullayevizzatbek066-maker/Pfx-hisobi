@@ -1,5 +1,6 @@
 using System.Windows;
 using Microsoft.Win32;
+using PFXManager.App.Resources;
 using PFXManager.App.Views.Dialogs;
 using PFXManager.Core.Models;
 
@@ -41,13 +42,13 @@ public sealed class DialogService : IDialogService
 
     public void ShowInfo(string message, string title = "")
     {
-        MessageBox.Show(Application.Current.MainWindow, message, string.IsNullOrEmpty(title) ? Resources.Strings.AppTitle : title,
+        MessageBox.Show(Application.Current.MainWindow, message, string.IsNullOrEmpty(title) ? Strings.AppTitle : title,
             MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     public void ShowError(string message, string title = "")
     {
-        MessageBox.Show(Application.Current.MainWindow, message, string.IsNullOrEmpty(title) ? Resources.Strings.AppTitle : title,
+        MessageBox.Show(Application.Current.MainWindow, message, string.IsNullOrEmpty(title) ? Strings.AppTitle : title,
             MessageBoxButton.OK, MessageBoxImage.Error);
     }
 }

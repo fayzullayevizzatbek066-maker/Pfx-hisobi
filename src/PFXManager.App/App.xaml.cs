@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using PFXManager.App.Resources;
 using PFXManager.App.Services;
 using PFXManager.App.ViewModels;
 using PFXManager.App.Views;
@@ -67,7 +68,7 @@ public partial class App : System.Windows.Application
     {
         MessageBox.Show(
             $"Kutilmagan xatolik yuz berdi:\n{e.Exception.Message}",
-            Resources.Strings.AppTitle,
+            Strings.AppTitle,
             MessageBoxButton.OK,
             MessageBoxImage.Error);
         e.Handled = true;
@@ -79,7 +80,7 @@ public partial class App : System.Windows.Application
         {
             MessageBox.Show(
                 $"Jiddiy xatolik yuz berdi:\n{ex.Message}",
-                Resources.Strings.AppTitle,
+                Strings.AppTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
