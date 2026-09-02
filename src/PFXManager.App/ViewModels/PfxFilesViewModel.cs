@@ -9,6 +9,7 @@ using PFXManager.App.Services;
 using PFXManager.Core.Enums;
 using PFXManager.Core.Interfaces;
 using PFXManager.Core.Models;
+using PFXManager.Core.Services;
 
 namespace PFXManager.App.ViewModels;
 

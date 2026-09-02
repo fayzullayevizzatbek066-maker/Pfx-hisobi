@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using PFXManager.App.Services;
 using PFXManager.App.ViewModels;
 using PFXManager.App.Views;
+using PFXManager.Core.Interfaces;
 using PFXManager.Infrastructure.DependencyInjection;
 using PFXManager.Infrastructure.Persistence;
 
@@ -28,7 +29,7 @@ public partial class App : System.Windows.Application
         var migrator = _host.Services.GetRequiredService<DatabaseMigrator>();
         migrator.Migrate();
 
-        var auditLogger = _host.Services.GetRequiredService<Core.Interfaces.IAuditLogger>();
+        var auditLogger = _host.Services.GetRequiredService<IAuditLogger>();
         await auditLogger.LogAsync("application_started");
 
         var mainViewModel = _host.Services.GetRequiredService<MainViewModel>();
@@ -88,7 +89,7 @@ public partial class App : System.Windows.Application
     {
         if (_host is not null)
         {
-            var auditLogger = _host.Services.GetService<Core.Interfaces.IAuditLogger>();
+            var auditLogger = _host.Services.GetService<IAuditLogger>();
             if (auditLogger is not null)
             {
                 await auditLogger.LogAsync("application_exit");
