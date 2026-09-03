@@ -96,6 +96,82 @@ public class PathHandlingTests : IDisposable
     }
 
     [Fact]
+    public async Task ScanAsync_SkipsReparsePointsByDefault()
+    {
+        var realDir = Path.Combine(_root, "real-target");
+        TestCertificateFactory.WriteTempPfx(realDir, "via-link.pfx", "ViaLink", DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(30));
+
+        var linkPath = Path.Combine(_root, "link-to-real");
+        Directory.CreateSymbolicLink(linkPath, realDir);
+
+        var scanner = new FileSystemScanner(NullLogger<FileSystemScanner>.Instance);
+        var options = new ScanOptions(new[] { linkPath }, FollowReparsePoints: false);
+
+        var found = new List<string>();
+        await foreach (var file in scanner.ScanAsync(options, progress: null, onError: null, CancellationToken.None))
+        {
+            found.Add(file);
+        }
+
+        Assert.Empty(found);
+    }
+
+    [Fact]
+    public async Task ScanAsync_FollowsReparsePointsWhenEnabled()
+    {
+        // Mirrors a common real-world case (e.g. Windows Known Folder redirection sending
+        // Desktop/Documents/Downloads to OneDrive via a directory junction): a PFX only
+        // reachable by walking through a reparse point must still be found once opted in.
+        var realDir = Path.Combine(_root, "real-target");
+        TestCertificateFactory.WriteTempPfx(realDir, "via-link.pfx", "ViaLink", DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(30));
+
+        var linkPath = Path.Combine(_root, "link-to-real");
+        Directory.CreateSymbolicLink(linkPath, realDir);
+
+        var scanner = new FileSystemScanner(NullLogger<FileSystemScanner>.Instance);
+        var options = new ScanOptions(new[] { linkPath }, FollowReparsePoints: true);
+
+        var found = new List<string>();
+        await foreach (var file in scanner.ScanAsync(options, progress: null, onError: null, CancellationToken.None))
+        {
+            found.Add(file);
+        }
+
+        Assert.Single(found);
+        Assert.EndsWith("via-link.pfx", found[0], StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ScanAsync_FollowingReparsePoints_DoesNotInfiniteLoopOnACycle()
+    {
+        // A symlink that points back at an ancestor directory would recurse forever without
+        // cycle protection; the scanner must still terminate and still find the real file.
+        var outerDir = Path.Combine(_root, "outer");
+        TestCertificateFactory.WriteTempPfx(outerDir, "real.pfx", "Real", DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(30));
+
+        var cycleLink = Path.Combine(outerDir, "loops-back-to-outer");
+        Directory.CreateSymbolicLink(cycleLink, outerDir);
+
+        var scanner = new FileSystemScanner(NullLogger<FileSystemScanner>.Instance);
+        var options = new ScanOptions(new[] { outerDir }, FollowReparsePoints: true);
+
+        var found = new List<string>();
+        var completed = await Task.Run(async () =>
+        {
+            await foreach (var file in scanner.ScanAsync(options, progress: null, onError: null, CancellationToken.None))
+            {
+                found.Add(file);
+            }
+
+            return true;
+        }).WaitAsync(TimeSpan.FromSeconds(10));
+
+        Assert.True(completed);
+        Assert.Single(found);
+        Assert.EndsWith("real.pfx", found[0], StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task ScanAsync_CanBeCancelled()
     {
         for (var i = 0; i < 20; i++)

@@ -149,7 +149,11 @@ public sealed partial class MainViewModel : ObservableObject, IRecipient<Navigat
 
         try
         {
-            var options = new ScanOptions(roots, FollowReparsePoints: false, MaxDegreeOfParallelism: 4);
+            // Follow reparse points: modern Windows routinely redirects Desktop/Documents/Downloads
+            // to OneDrive via directory junctions, and a scanner that skips them (the old default)
+            // silently misses PFX files saved in those very common locations. Safe to do now that
+            // FileSystemScanner tracks visited canonical paths and breaks real cycles.
+            var options = new ScanOptions(roots, FollowReparsePoints: true, MaxDegreeOfParallelism: 4);
             var session = await _workspace.RunScanAsync(options, progress, _scanCts.Token);
             await ScanHistory.LoadCommand.ExecuteAsync(null);
 

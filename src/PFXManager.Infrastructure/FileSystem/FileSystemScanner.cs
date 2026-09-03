@@ -270,7 +270,7 @@ public sealed class FileSystemScanner : IFileSystemScanner
                     canonicalPath = target;
                 }
             }
-            catch (IOException)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
                 // Target could not be resolved; fall back to the reparse point's own path for cycle tracking.
             }
