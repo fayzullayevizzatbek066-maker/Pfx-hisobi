@@ -41,12 +41,23 @@ public sealed class X509CertificateParser : ICertificateParser
 
             return BuildResult(filePath, certificate);
         }
-        catch (CryptographicException ex) when (IsPasswordFailure(ex))
-        {
-            return CertificateParseResult.PasswordProtected(filePath);
-        }
         catch (CryptographicException ex)
         {
+            // .NET's X509Certificate2 (Windows CryptoAPI/CNG, or OpenSSL on Linux) cannot decode
+            // PKCS#12 files that use algorithms it doesn't have a provider for - most notably GOST
+            // 28147-89 / GOST R 34.10, which Uzbekistan's E-IMZO certificates commonly use. Before
+            // giving up, retry with BouncyCastle, which implements those algorithms itself and
+            // doesn't depend on what the OS has registered.
+            if (BouncyCastlePfxReader.TryRead(filePath, attemptedPassword, out var bcResult, out _) && bcResult is not null)
+            {
+                return bcResult;
+            }
+
+            if (IsPasswordFailure(ex))
+            {
+                return CertificateParseResult.PasswordProtected(filePath);
+            }
+
             _logger.LogDebug(ex, "Corrupted or unsupported PFX at {Path}", filePath);
             return CertificateParseResult.Failed(filePath, "Sertifikatni o'qib bo'lmadi: fayl buzilgan yoki qo'llab-quvvatlanmaydigan format.");
         }

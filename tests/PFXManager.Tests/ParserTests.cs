@@ -70,6 +70,47 @@ public class ParserTests : IDisposable
         Assert.NotNull(result.ErrorMessage);
     }
 
+    [Fact]
+    public void BouncyCastlePfxReader_ReadsStandardPfx_WithThumbprintMatchingDotNet()
+    {
+        var notBefore = DateTimeOffset.UtcNow.AddDays(-1);
+        var notAfter = DateTimeOffset.UtcNow.AddDays(365);
+        var path = TestCertificateFactory.WriteTempPfx(_tempDirectory, "bc-readable.pfx", "BouncyCastle Reader", notBefore, notAfter);
+
+        var dotNetCert = new System.Security.Cryptography.X509Certificates.X509Certificate2(
+            path, string.Empty,
+            System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.EphemeralKeySet);
+
+        var success = PFXManager.Infrastructure.Certificates.BouncyCastlePfxReader.TryRead(
+            path, string.Empty, out var result, out var passwordFailure);
+
+        Assert.True(success);
+        Assert.False(passwordFailure);
+        Assert.NotNull(result);
+        Assert.True(result!.Success);
+        Assert.Equal("BouncyCastle Reader", result.CommonName);
+        Assert.True(result.HasPrivateKey);
+        Assert.NotNull(result.Thumbprint);
+        Assert.Equal(dotNetCert.Thumbprint, result.Thumbprint, ignoreCase: true);
+        Assert.Equal(dotNetCert.SerialNumber, result.SerialNumber, ignoreCase: true);
+    }
+
+    [Fact]
+    public async Task ParseAsync_FallsBackToBouncyCastle_WhenPrimaryParseFails()
+    {
+        // A file that isn't a valid PKCS12 at all should still fail cleanly through both readers
+        // rather than throwing - this exercises the fallback code path in X509CertificateParser
+        // (BouncyCastle attempted, fails too, original failure classification is returned).
+        var path = Path.Combine(_tempDirectory, "not-a-pfx-at-all.pfx");
+        await File.WriteAllTextAsync(path, "this is definitely not a PKCS12 file");
+
+        var parser = new X509CertificateParser(NullLogger<X509CertificateParser>.Instance);
+        var result = await parser.ParseAsync(path, null, CancellationToken.None);
+
+        Assert.False(result.Success);
+        Assert.NotNull(result.ErrorMessage);
+    }
+
     public void Dispose()
     {
         try { Directory.Delete(_tempDirectory, recursive: true); } catch { /* best effort cleanup */ }
