@@ -53,7 +53,7 @@ public sealed class X509CertificateParser : ICertificateParser
                 return bcResult;
             }
 
-            if (IsPasswordFailure(ex))
+            if (IsPasswordFailure(ex, bcErrorDetail))
             {
                 return CertificateParseResult.PasswordProtected(filePath);
             }
@@ -74,14 +74,29 @@ public sealed class X509CertificateParser : ICertificateParser
         }
     }
 
-    private static bool IsPasswordFailure(CryptographicException ex)
+    internal static bool IsPasswordFailure(CryptographicException ex, string? bouncyCastleErrorDetail = null)
     {
         // .NET does not expose a typed "wrong password" exception; the underlying platform
         // (Windows CryptoAPI / OpenSSL) reports it through HResult / message text.
         const int NteBadKeySet = unchecked((int)0x80090016);
         const int NteBadData = unchecked((int)0x80090005);
+        // HRESULT_FROM_WIN32(ERROR_INVALID_PASSWORD) - the classic Windows CryptoAPI PKCS12
+        // "wrong password" failure. Its *message* ("The specified network password is not
+        // correct") is localized to the OS UI language (observed in the wild as the Russian
+        // "Сетевой пароль указан неверно."), so the HResult - not an English substring match on
+        // the message - is what actually identifies this reliably across locales.
+        const int ErrorInvalidPassword = unchecked((int)0x80070056);
 
-        if (ex.HResult is NteBadKeySet or NteBadData)
+        if (ex.HResult is NteBadKeySet or NteBadData or ErrorInvalidPassword)
+        {
+            return true;
+        }
+
+        // BouncyCastle's own failure text is never OS-localized, so its wording is a reliable
+        // second signal for the same underlying "wrong password" outcome regardless of what
+        // language .NET's own message came back in.
+        if (bouncyCastleErrorDetail is not null &&
+            bouncyCastleErrorDetail.Contains("wrong password", StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }

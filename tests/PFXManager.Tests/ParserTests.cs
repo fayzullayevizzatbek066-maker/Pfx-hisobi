@@ -70,6 +70,30 @@ public class ParserTests : IDisposable
         Assert.NotNull(result.ErrorMessage);
     }
 
+    [Theory]
+    [InlineData("Сетевой пароль указан неверно.")] // Russian-locale Windows CAPI message for the same failure
+    [InlineData("The specified network password is not correct.")] // English-locale equivalent
+    public void IsPasswordFailure_RecognizesWrongPasswordByHResult_RegardlessOfMessageLanguage(string localizedMessage)
+    {
+        // The real-world bug this guards: a wrong-password PKCS12 failure on non-English Windows
+        // reports via this exact HResult (HRESULT_FROM_WIN32(ERROR_INVALID_PASSWORD)) with a
+        // message in the OS UI language - matching only on English substrings like "password"
+        // silently misclassified it as a generic ReadError instead of PasswordRequired.
+        var ex = new System.Security.Cryptography.CryptographicException(localizedMessage);
+        ex.HResult = unchecked((int)0x80070056);
+
+        Assert.True(X509CertificateParser.IsPasswordFailure(ex));
+    }
+
+    [Fact]
+    public void IsPasswordFailure_RecognizesBouncyCastleWrongPasswordSignal_EvenWithUnrecognizedHResultAndMessage()
+    {
+        var ex = new System.Security.Cryptography.CryptographicException("some opaque native error text");
+
+        Assert.True(X509CertificateParser.IsPasswordFailure(
+            ex, bouncyCastleErrorDetail: "IOException: PKCS12 key store MAC invalid - wrong password or corrupted file."));
+    }
+
     [Fact]
     public void BouncyCastlePfxReader_ReadsStandardPfx_WithThumbprintMatchingDotNet()
     {
