@@ -30,6 +30,7 @@ MANIFEST
 #   Usually these files are written by a python script from a template
 #   before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
+!src/PFXManager.App/app.manifest
 *.spec
 
 # Installer logs
@@ -216,3 +217,18 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# .NET / Visual Studio
+bin/
+obj/
+*.user
+*.suo
+.vs/
+publish/
+*.db
+*.db-shm
+*.db-wal
+TestResults/
+artifacts/
+*.received.*
+
