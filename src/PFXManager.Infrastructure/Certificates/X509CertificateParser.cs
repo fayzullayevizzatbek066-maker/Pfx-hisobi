@@ -48,7 +48,7 @@ public sealed class X509CertificateParser : ICertificateParser
             // 28147-89 / GOST R 34.10, which Uzbekistan's E-IMZO certificates commonly use. Before
             // giving up, retry with BouncyCastle, which implements those algorithms itself and
             // doesn't depend on what the OS has registered.
-            if (BouncyCastlePfxReader.TryRead(filePath, attemptedPassword, out var bcResult, out _) && bcResult is not null)
+            if (BouncyCastlePfxReader.TryRead(filePath, attemptedPassword, out var bcResult, out var bcErrorDetail) && bcResult is not null)
             {
                 return bcResult;
             }
@@ -59,7 +59,9 @@ public sealed class X509CertificateParser : ICertificateParser
             }
 
             _logger.LogDebug(ex, "Corrupted or unsupported PFX at {Path}", filePath);
-            return CertificateParseResult.Failed(filePath, "Sertifikatni o'qib bo'lmadi: fayl buzilgan yoki qo'llab-quvvatlanmaydigan format.");
+            var detail = $".NET: {ex.GetType().Name}: {ex.Message}" +
+                         (bcErrorDetail is null ? string.Empty : $" | BouncyCastle: {bcErrorDetail}");
+            return CertificateParseResult.Failed(filePath, $"Sertifikatni o'qib bo'lmadi: {detail}");
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

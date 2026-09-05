@@ -79,6 +79,7 @@ public static class Strings
     public const string Col_FilePath = "Fayl manzili";
     public const string Col_Drive = "Disk";
     public const string Col_Size = "Hajmi";
+    public const string Col_ErrorDetail = "Xatolik matni";
 
     // Permanent delete confirmation
     public const string Dialog_PermanentDeleteTitle = "Butunlay o'chirish";

@@ -57,6 +57,7 @@
                 <DataGridTextColumn Header="{x:Static res:Strings.Col_FilePath}" Binding="{Binding FullPath}" Width="260" />
                 <DataGridTextColumn Header="{x:Static res:Strings.Col_Drive}" Binding="{Binding Drive}" Width="70" />
                 <DataGridTextColumn Header="{x:Static res:Strings.Col_Size}" Binding="{Binding SizeDisplay}" Width="90" />
+                <DataGridTextColumn Header="{x:Static res:Strings.Col_ErrorDetail}" Binding="{Binding ReadErrorDetail}" Width="320" />
             </DataGrid.Columns>
 
             <DataGrid.RowStyle>

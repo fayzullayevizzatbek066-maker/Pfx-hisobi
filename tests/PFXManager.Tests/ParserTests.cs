@@ -82,10 +82,10 @@ public class ParserTests : IDisposable
             System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.EphemeralKeySet);
 
         var success = PFXManager.Infrastructure.Certificates.BouncyCastlePfxReader.TryRead(
-            path, string.Empty, out var result, out var passwordFailure);
+            path, string.Empty, out var result, out var errorDetail);
 
         Assert.True(success);
-        Assert.False(passwordFailure);
+        Assert.Null(errorDetail);
         Assert.NotNull(result);
         Assert.True(result!.Success);
         Assert.Equal("BouncyCastle Reader", result.CommonName);

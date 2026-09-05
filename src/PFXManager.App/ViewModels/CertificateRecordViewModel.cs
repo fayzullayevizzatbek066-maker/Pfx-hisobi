@@ -50,6 +50,9 @@ public sealed partial class CertificateRecordViewModel : ObservableObject
     public string Drive => Record.Drive;
     public bool IsDuplicate => Record.DuplicateGroupId is not null;
 
+    /// <summary>Raw parser failure text (never null for a Success record) - shown so a ReadError can be diagnosed instead of guessed at.</summary>
+    public string? ReadErrorDetail => Record.ReadErrorMessage;
+
     public string SizeDisplay
     {
         get

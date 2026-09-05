@@ -15,10 +15,10 @@ namespace PFXManager.Infrastructure.Certificates;
 /// </summary>
 internal static class BouncyCastlePfxReader
 {
-    public static bool TryRead(string filePath, string password, out CertificateParseResult? result, out bool passwordFailure)
+    public static bool TryRead(string filePath, string password, out CertificateParseResult? result, out string? errorDetail)
     {
         result = null;
-        passwordFailure = false;
+        errorDetail = null;
 
         Pkcs12Store store;
         try
@@ -27,12 +27,13 @@ internal static class BouncyCastlePfxReader
             using var stream = File.OpenRead(filePath);
             store.Load(stream, password.ToCharArray());
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // BouncyCastle does not expose a distinct "wrong password" exception type either;
             // since this reader only runs after the primary .NET parser already failed, an empty
             // password is the common case for these files and a genuine password requirement is
             // reported by the primary parser's own (more reliable) heuristic, not repeated here.
+            errorDetail = $"{ex.GetType().Name}: {ex.Message}";
             return false;
         }
 
@@ -53,12 +54,14 @@ internal static class BouncyCastlePfxReader
 
         if (alias is null)
         {
+            errorDetail = "BouncyCastle: no certificate/key entry found in the PKCS12 store.";
             return false;
         }
 
         var certEntry = store.GetCertificate(alias);
         if (certEntry is null)
         {
+            errorDetail = "BouncyCastle: alias resolved but GetCertificate returned null.";
             return false;
         }
 
