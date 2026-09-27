@@ -1,0 +1,44 @@
+<UserControl x:Class="PFXManager.App.Views.QuarantineView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:PFXManager.App.Resources">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{x:Static res:Strings.Nav_Quarantine}" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+            <Button Content="{x:Static res:Strings.Refresh}" Command="{Binding LoadCommand}" Padding="10,6" Margin="0,0,8,0" />
+            <Button Content="{x:Static res:Strings.PermanentDelete}" Click="DeleteSelected_Click" Padding="10,6"
+                    Background="#C0392B" Foreground="White" BorderThickness="0" />
+        </StackPanel>
+
+        <DataGrid Grid.Row="2" x:Name="Grid" ItemsSource="{Binding Items}" SelectionMode="Extended">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="{x:Static res:Strings.Col_FileName}" Binding="{Binding FileName}" Width="180" />
+                <DataGridTextColumn Header="{x:Static res:Strings.Quarantine_Owner}" Binding="{Binding Thumbprint}" Width="160" />
+                <DataGridTextColumn Header="{x:Static res:Strings.Quarantine_OriginalPath}" Binding="{Binding OriginalPath}" Width="280" />
+                <DataGridTextColumn Header="{x:Static res:Strings.Quarantine_QuarantinedAt}" Binding="{Binding QuarantinedAtUtc, StringFormat=dd.MM.yyyy HH:mm}" Width="150" />
+                <DataGridTextColumn Header="{x:Static res:Strings.Quarantine_Reason}" Binding="{Binding Reason}" Width="200" />
+                <DataGridTemplateColumn Header="" Width="220">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="{x:Static res:Strings.Restore}"
+                                        Command="{Binding DataContext.RestoreCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}" Padding="8,4" Margin="0,0,6,0" />
+                                <Button Content="{x:Static res:Strings.PermanentDelete}"
+                                        Command="{Binding DataContext.PermanentDeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}" Padding="8,4" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

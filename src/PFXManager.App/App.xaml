@@ -1,0 +1,40 @@
+<Application x:Class="PFXManager.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:PFXManager.App.ViewModels"
+             xmlns:views="clr-namespace:PFXManager.App.Views"
+             xmlns:conv="clr-namespace:PFXManager.App.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/Theme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <conv:InverseBoolConverter x:Key="InverseBoolConverter" />
+            <conv:StatusToBadgeConverter x:Key="StatusToBadgeConverter" />
+
+            <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+                <views:DashboardView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:PfxFilesViewModel}">
+                <views:PfxFilesView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:WindowsCertificatesViewModel}">
+                <views:WindowsCertificatesView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:DuplicatesViewModel}">
+                <views:DuplicatesView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:QuarantineViewModel}">
+                <views:QuarantineView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ScanHistoryViewModel}">
+                <views:ScanHistoryView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                <views:SettingsView />
+            </DataTemplate>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

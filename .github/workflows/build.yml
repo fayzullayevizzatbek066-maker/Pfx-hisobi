@@ -1,0 +1,96 @@
+name: Build, Test, Package
+
+on:
+  push:
+    branches: [ main, "claude/**" ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  # Fast feedback on the cross-platform Core + Infrastructure + Tests projects (no WPF involved),
+  # runnable even outside Windows since PFXManager.App is intentionally excluded here.
+  test-core-cross-platform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore tests/PFXManager.Tests/PFXManager.Tests.csproj
+
+      - name: Build (Core + Infrastructure + Tests)
+        run: dotnet build tests/PFXManager.Tests/PFXManager.Tests.csproj -c Release --no-restore
+
+      - name: Test
+        run: dotnet test tests/PFXManager.Tests/PFXManager.Tests.csproj -c Release --no-build --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: tests/PFXManager.Tests/TestResults/*.trx
+
+  # Full solution build (including the WPF app, which requires Windows), publish a self-contained
+  # win-x64 build, and package it with Inno Setup into PFXManager-Setup.exe.
+  build-windows-and-package:
+    runs-on: windows-latest
+    needs: test-core-cross-platform
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore PFXManager.sln
+
+      - name: Build solution (Release)
+        run: dotnet build PFXManager.sln -c Release --no-restore
+
+      - name: Test
+        run: dotnet test tests/PFXManager.Tests/PFXManager.Tests.csproj -c Release --no-build --logger "trx;LogFileName=test-results-windows.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-windows
+          path: tests/PFXManager.Tests/TestResults/*.trx
+
+      - name: Publish self-contained win-x64 build
+        run: >
+          dotnet publish src/PFXManager.App/PFXManager.App.csproj
+          -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=false
+          -o publish/PFXManager
+
+      - name: Upload published app
+        uses: actions/upload-artifact@v4
+        with:
+          name: PFXManager-win-x64
+          path: publish/PFXManager
+
+      - name: Compile installer (Inno Setup)
+        shell: pwsh
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup -y --no-progress
+            $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          }
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          & $iscc "installer\PFXManager.iss"
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: PFXManager-Setup
+          path: dist/PFXManager-Setup.exe
